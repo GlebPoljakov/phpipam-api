@@ -51,7 +51,7 @@ class Address
 
 				//Get Master Subnet Details
 				$masterSubnet = getSubnetDetailsById($this->subnet['masterSubnetId']);
-				if (!($masterSubnet['isFolder'])) $this->subnet['masterSubnet'] = Transform2long($masterSubnet['subnet']).'/'.$masterSubnet['mask'];
+				if (!($masterSubnet['isFolder'])) $this->subnet['masterSubnet'] = Transform2long($masterSubnet['subnet']).'/'.$masterSubnet['mask'].' ['.$masterSubnet['description'].']';
 
 				//Get VRF details
 				if ($this->subnet['vrfId']) {
