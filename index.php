@@ -17,6 +17,7 @@ $settings = getAllSettings();
 include_once 'models/section.php';						//section actions
 include_once 'models/subnet.php';						//subnet actions
 include_once 'models/address.php';						//address actions
+include_once 'models/vrf.php';							//vrf actions
 
 /* wrap in a try-catch block to catch exceptions */
 try {
@@ -100,7 +101,7 @@ try {
 	$result = array();
 	$result['success'] = false;
 	$result['errormsg'] = $e->getMessage();
-
+	$result['errcode'] = $e->getCode();
 }
 
 //echo the result of the API call

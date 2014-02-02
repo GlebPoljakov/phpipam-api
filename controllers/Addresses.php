@@ -12,15 +12,29 @@ class Addresses
 	/* variables */
 	private $_params;
 	
-	/* set parameters, provided via post */
+	/* set parameters, provided via post
+	 *
+	 * available params:
+	 *		format	- format of ip-address representation
+	 *		ip	- ip-address on format of $param['format']
+	 *
+	 */
 	public function __construct($params)
 	{
 		$this->_params = $params;
 		
 		//ip address format, can be decimal or ip
-		if(!$this->_params['format'])								{ $this->_params['format'] = "decimal"; }
-		//verify IP address format
-		if(!($this->_params['format']=="decimal" || $this->_params['format']== "ip"))		{ throw new Exception('Invalid format'); }
+		if (!$this->_params['format'])
+			$this->_params['format'] = "decimal";
+
+		//verify IP address format, it must be 'decimal' or 'ip'
+		if (
+			!(
+			    $this->_params['format'] == "decimal" ||
+			    $this->_params['format'] == "ip"
+			)
+		)
+		    throw new Exception('Invalid format');
 	}
 
 	/** 

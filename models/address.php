@@ -27,10 +27,10 @@ class Address
 		}
 		// }}}
 
-		// {{ get addr details by ip
+		// {{{ get addr details by ip
 		$res = getIpAddrDetailsByIp ($this->ip);
 		//throw new exception if not existing
-		if(sizeof($res)==0) 							{ throw new Exception('Address not existed'); }
+		if(sizeof($res)==0) 							{ throw new Exception('Address not existed',10); }
 
 		//create object from results
 		foreach($res as $key=>$line) {
