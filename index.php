@@ -18,6 +18,7 @@ include_once 'models/section.php';						//section actions
 include_once 'models/subnet.php';						//subnet actions
 include_once 'models/address.php';						//address actions
 include_once 'models/vrf.php';							//vrf actions
+include_once 'models/vlan.php';							//vlan actions
 
 /* wrap in a try-catch block to catch exceptions */
 try {
