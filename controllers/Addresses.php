@@ -21,20 +21,27 @@ class Addresses
 	 */
 	public function __construct($params)
 	{
-		$this->_params = $params;
-		
-		//ip address format, can be decimal or ip
-		if (!$this->_params['format'])
-			$this->_params['format'] = "decimal";
+		// {{{ validate all params
 
-		//verify IP address format, it must be 'decimal' or 'ip'
-		if (
-			!(
-			    $this->_params['format'] == "decimal" ||
-			    $this->_params['format'] == "ip"
+			//verify IP address format, it must be 'decimal' or 'ip'
+			if (
+				$params['format'] == "decimal" ||
+				$params['format'] == "ip"
 			)
-		)
-		    throw new Exception('Invalid format');
+				$this->_params['format'] = $params['format'];
+			else
+				throw new Exception('Invalid format. Format will be [decimal|ip].');
+
+			//get ip address and verify
+			if ( $params['ip'] != '' ) {
+				$ip = ( $this->_params['format']=='ip' ) ? $params['ip'] : ip2long($params['ip']);
+				if ( filter_var ($ip, FILTER_VALIDATE_IP))
+					$this->_params['ip'] = $params['ip'];
+				else
+					throw new Exception ( 'Invalid ip.' );
+			}
+		// }}}
+
 	}
 
 	/** 
@@ -52,6 +59,10 @@ class Addresses
 	*/
 	public function readAddresses()
 	{
+		//check for necessary params
+		if ( !$this->_params['ip']) 
+			throw new Exception ('IP not provided.');
+
 		//init address class
 		$address = new Address();
 		
