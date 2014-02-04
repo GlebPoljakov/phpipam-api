@@ -40,7 +40,7 @@ class Subnet
 		*/
 		elseif($this->id) {
 			//id must be set and numberic
-			if ( is_null($this->id) || !is_numeric($this->id) ) 				{ throw new Exception('Subnet id not existing - '.$this->id); }
+			if ( is_null($this->id) || !is_numeric($this->id) ) 				{ throw new Exception('Invalid subnet id - '.$this->id); }
 			//get subnet by id
 			$res = getSubnetDetailsById ($this->id);
 			//throw new exception if not existing
@@ -51,14 +51,80 @@ class Subnet
 		* subnet by name 
 		*/
 		elseif($this->name) {
-			//id must be set and numberic
-			if ( is_null($this->name) || strlen($this->name)==0 ) 				{ throw new Exception('Invalid subnet name - '.$this->name); }
-			//get subnet by id
+			//name must be set and string
+			if ( is_null($this->name) || strlen($this->name)==0 )				{ throw new Exception('Invalid subnet name - '.$this->name); }
+			//get subnet by Name
 			$res = getSubnetDetailsByName ($this->name);
 			//throw new exception if not existing
 			if(sizeof($res)==0) 												{ throw new Exception('Subnet not existing'); }
 		}
-		
+
+		/**
+		* subnet by CIDR
+		*/
+		elseif($this->cidr) {
+			// {{{ cidr must be subnet in CIDR-format
+				list ($ip, $mask) = explode ('/',$this->cidr);
+				if (
+				    !(
+					filter_var($ip, FILTER_VALIDATE_IP) &&
+					filter_var($mask, FILTER_VALIDATE_INT)
+				    )
+				)
+					throw new Exception('Invalid subnet cidr - '.$this->cidr);
+			// }}}
+
+			//Transform ip form dotted-decimal to long integer
+			$ip = Transform2decimal($ip);
+
+			// {{{ get subnet by subnet/mask
+				if ( $this->longerprefix ) {
+					// {{{ find prefix with $ip
+						//Get all subnets, ordered by subnet
+						$allSubnets = fetchAllSubnets ('subnet', true);
+
+						//Get subnets loger than given prefix
+						foreach ($allSubnets as $row)
+							//find first net
+							if ( (int) $row['subnet'] <= (int) $ip ){
+								$res = $row;
+								break;
+							}
+					// }}}
+				}
+				else
+					$res = getSubnetDetailsByIpMask ($ip, $mask);
+			// }}}
+
+			//throw new exception if not existing
+			if(sizeof($res)==0) 												{ throw new Exception('Subnet not existing'); }
+
+			//If format is IP, do resolve all Id-fiels 
+			if ($this->format == 'ip'){
+				//Get Master Subnet Details
+				$masterSubnet = getSubnetDetailsById($res['masterSubnetId']);
+				$res['masterSubnetId'] = (!($masterSubnet['isFolder'])) ?
+					Transform2long($masterSubnet['subnet']).'/'.$masterSubnet['mask'].' ['.$masterSubnet['description'].']' :
+					'';
+
+				//Get VRF details
+				if ($res['vrfId']) {
+				    $vrfDetails = getVRFDetailsById($res['vrfId']);
+				    $res['vrfId'] = '['.$vrfDetails['rd'].'] '.$vrfDetails['name'].' ('.$vrfDetails['description'].')';
+				}
+
+				//Get Section name
+				if ($res['sectionId'])
+				    $res['sectionName'] = getSectionDetailsById($res['sectionId'])['name'];
+
+				//Get VLAN Details
+				if ($res['vlanId']) {
+				    $vlanDetails = subnetGetVlanDetailsById($res['vlanId']);
+				    $res['vlanId'] = '['.$vlanDetails['number'].'] '.$vlanDetails['name'].' ('.$vlanDetails['description'].')';
+				}
+			}
+		}
+
 		/** 
 		* method missing 
 		*/
